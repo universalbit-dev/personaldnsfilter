@@ -64,7 +64,7 @@ import util.conpool.TLSSocketFactory;
 
 public class DNSFilterManager extends ConfigurationAccess  {
 
-	public static final String VERSION = "1505305";
+	public static final String VERSION = "1505401";
 
 	private static DNSFilterManager INSTANCE = new DNSFilterManager();
 
@@ -751,7 +751,9 @@ public class DNSFilterManager extends ConfigurationAccess  {
 		int token = 0;
 		int wildcard = 0;
 
-		int r = in.read();
+		int r = 0;
+		r = Utils.skipWhitespace(in, 9);
+
 		while (r == 35) {
 			//lines starts with # - ignore line!
 			r = Utils.skipLine(in);

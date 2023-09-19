@@ -522,15 +522,17 @@ public class DNSFilterService extends VpnService  {
 				int cnt = fallbackDNS.countTokens();
 				for (int i = 0; i < cnt; i++) {
 					String dnsEntry = fallbackDNS.nextToken().trim();
-					if (DNSProxyActivity.debug) Logger.getLogger().logLine("DNS:" + dnsEntry);
-					try {
-						DNSServer dnsServer = DNSServer.getInstance().createDNSServer(dnsEntry, timeout);
-						if (rootMode && dnsServer.getPort() == 53)
-							throw new IOException("Port 53 not allowed when running in root mode! Use DoT or DoH!");
-						dnsAdrs.add(DNSServer.getInstance().createDNSServer(dnsEntry, timeout));
-					} catch (Exception e) {
-						Logger.getLogger().logLine("Cannot create DNS server for " + dnsEntry + "!\n" + e.toString());
-						Logger.getLogger().message("Invalid DNS server entry: '" + dnsEntry+"'");
+					if (!dnsEntry.startsWith("#") && !dnsEntry.startsWith("~")) {
+						if (DNSProxyActivity.debug) Logger.getLogger().logLine("DNS:" + dnsEntry);
+						try {
+							DNSServer dnsServer = DNSServer.getInstance().createDNSServer(dnsEntry, timeout);
+							if (rootMode && dnsServer.getPort() == 53)
+								throw new IOException("Port 53 not allowed when running in root mode! Use DoT or DoH!");
+							dnsAdrs.add(DNSServer.getInstance().createDNSServer(dnsEntry, timeout));
+						} catch (Exception e) {
+							Logger.getLogger().logLine("Cannot create DNS server for " + dnsEntry + "!\n" + e.toString());
+							Logger.getLogger().message("Invalid DNS server entry: '" + dnsEntry + "'");
+						}
 					}
 				}
 			}
@@ -712,7 +714,7 @@ public class DNSFilterService extends VpnService  {
 		try {
 
 			Intent notificationIntent = new Intent(this, DNSProxyActivity.class);
-			pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+			pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 			Notification noti;
 
 			// Initialize and start VPN Mode if not disabled
@@ -736,7 +738,7 @@ public class DNSFilterService extends VpnService  {
 
 				Intent pause_resume = new Intent();
 				pause_resume.setAction("pause_resume");
-				PendingIntent pause_resume_Intent = PendingIntent.getBroadcast(this, 12345, pause_resume, PendingIntent.FLAG_UPDATE_CURRENT);
+				PendingIntent pause_resume_Intent = PendingIntent.getBroadcast(this, 12345, pause_resume, PendingIntent.FLAG_UPDATE_CURRENT+PendingIntent.FLAG_IMMUTABLE);
 
 				notibuilder
 						.setContentTitle(getResources().getString(R.string.notificationActive))

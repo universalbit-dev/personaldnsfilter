@@ -109,8 +109,8 @@ public class DNSResolver implements Runnable {
 		short type = (short) info[1];
 		short clss = (short) info[2];
 
-		if (type != 1 && type != 28)
-			return false;
+		if(type != 1 && type != 28)
+			return handle_NonTyp_1_28(client, dnsQuery, response);
 
 		String host = (String) info[0];
 		byte[] ip = null;
@@ -143,6 +143,18 @@ public class DNSResolver implements Runnable {
 			return true;
 		} else
 			return false;
+	}
+
+	private boolean handle_NonTyp_1_28(String client, SimpleDNSMessage dnsQuery, DatagramPacket response) {
+		//Logger.getLogger().logLine("TYPE 65");
+		String host = dnsQuery.qHost;
+		if (!DNSResponsePatcher.filter(host, false))
+			return false;
+		DNSResponsePatcher.trafficLog(client, dnsQuery.qClass, dnsQuery.qType, host,null,0);
+		DNSResponsePatcher.logNstats(true, host);
+		int length = dnsQuery.get_NonTyp_1_28_FilterResponse(response.getData(), response.getOffset());
+		response.setLength(length);
+		return true;
 	}
 
 

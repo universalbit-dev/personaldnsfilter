@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     buildToolsVersion '30.0.2'
 
     defaultConfig {
         applicationId "dnsfilter.android"
         minSdkVersion 17
-        targetSdkVersion 30
+        targetSdkVersion 31
     }
 
     buildTypes {
@@ -16,4 +16,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+}
+
+
+dependencies {
+    testImplementation 'junit:junit:4.13.2'
 }
