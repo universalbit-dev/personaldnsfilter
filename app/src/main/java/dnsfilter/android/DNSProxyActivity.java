@@ -180,7 +180,7 @@ public class DNSProxyActivity extends Activity
 	protected static ConfigurationAccess CONFIG = ConfigurationAccess.getLocal();
 	protected static boolean switchingConfig = false;
 
-	protected static boolean CHECKING_PASSCODE_DIAG = false;
+	protected static AlertDialog PASSWORD_DIAG = null;
 
 	protected static boolean NO_VPN = false;
 
@@ -606,6 +606,8 @@ public class DNSProxyActivity extends Activity
 
 	@Override
 	public void onRequestPermissionsResult (int requestCode, String[] permissions, int[] grantResults) {
+		if (grantResults.length == 0)
+			return;
 		if (permissions[0].equals(Manifest.permission.POST_NOTIFICATIONS) && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 			handleRestart(); //let it take effect
 			handleInitialInfoPopUp();
@@ -626,9 +628,8 @@ public class DNSProxyActivity extends Activity
 
 	private void checkPasscode() {
 
-		if (CHECKING_PASSCODE_DIAG)
-			return; //avoid double checkign after resume
-
+		if (PASSWORD_DIAG != null && PASSWORD_DIAG.isShowing() )
+			PASSWORD_DIAG.dismiss();
 		try {
 			Properties config = CONFIG.getConfig();
 			if (config == null){
@@ -641,6 +642,7 @@ public class DNSProxyActivity extends Activity
 				return;
 
 			final AlertDialog.Builder builder = new AlertDialog.Builder(this).setCancelable(false);
+
 			builder.setTitle("Passcode required!");
 			final EditText input = new EditText(this);
 			input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
@@ -649,7 +651,7 @@ public class DNSProxyActivity extends Activity
 			builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					CHECKING_PASSCODE_DIAG = false;
+					PASSWORD_DIAG = null;
 					String inputcode = input.getText().toString();
 					if (!inputcode.equals(code)) {
 						message("Wrong passcode!");
@@ -658,12 +660,10 @@ public class DNSProxyActivity extends Activity
 				}
 			});
 
-			CHECKING_PASSCODE_DIAG = true;
-
 			Runnable ui = new Runnable() {
 				@Override
 				public void run() {
-					builder.show();
+					PASSWORD_DIAG = builder.show();
 				}
 			};
 			runOnUiThread(ui);
